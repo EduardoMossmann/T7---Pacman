@@ -11,6 +11,7 @@
 #include <fstream> //para acesso a  arquivos
 #include <cstdlib> //para usar o exit
 
+#define VELOCIDADE_PACMAN 2
 
 using namespace tela;
 using namespace geom;
@@ -32,9 +33,9 @@ struct Jogo{
     Personagem *Pacman;
     Retangulo *listaR;
     Vertice *listaV;
+    int ultima_tecla;
     char matriz [19][21];
 };
-
 
 
 void adiciona_vertice(char matriz[][21],int i, int j){
@@ -43,22 +44,35 @@ void adiciona_vertice(char matriz[][21],int i, int j){
 }
 
 void desenha_tela(Jogo * jogo, Tela t){
+    Cor preto = {1, 1, 1};
     Cor azul = {0.2, 0.3, 0.8};
     Cor amarelo = {0.9, 0.9, 0.0};
-    t.cor(azul);
 
     t.limpa();
+
+    Retangulo fundo_preto;
+    fundo_preto.pos = {0, 0};
+    fundo_preto.tam = {420, 380};
+    t.retangulo(fundo_preto);
+
+
+    t.cor(azul);
     Retangulo * r = jogo->listaR;
     while(r != nullptr){
         t.retangulo(*r);
         r = r->prox;
     }
+
+
     Circulo *c = new Circulo;
     c->centro.x = jogo->Pacman->pos.x;
     c->centro.y = jogo->Pacman->pos.y;
     c->raio = 10;
     t.cor(amarelo);
     t.circulo(*c);
+
+
+
     t.mostra();
     return;
 }
@@ -81,6 +95,7 @@ void inicia_personagem(Personagem *Pacman){
     return;
 }
 
+
 void preenche_matriz(Jogo * jogo){
     ifstream arq;
     string mapa;
@@ -101,6 +116,37 @@ void preenche_matriz(Jogo * jogo){
         }
     }
 }
+void movimenta_personagem(Jogo * jogo, Tela t){
+    int tecla = t.tecla();
+    if(tecla != 0)
+        jogo->ultima_tecla = tecla;
+
+    switch(jogo->ultima_tecla){
+        case 4:
+        case 83:
+            jogo->Pacman->vH = VELOCIDADE_PACMAN;
+            jogo->Pacman->vV = 0;
+            break;
+        case 1:
+        case 82:
+            jogo->Pacman->vH = VELOCIDADE_PACMAN * -1;
+            jogo->Pacman->vV = 0;
+            break;
+        case 23:
+        case 84:
+            jogo->Pacman->vH = 0;
+            jogo->Pacman->vV = VELOCIDADE_PACMAN * -1;
+            break;
+        case 19:
+        case 85:
+            jogo->Pacman->vH = 0;
+            jogo->Pacman->vV = VELOCIDADE_PACMAN;
+            break;
+    }
+
+    printf("V H : %d  -- V V : %d\n", jogo->Pacman->vH, jogo->Pacman->vV);
+}
+
 
 int main(int argc, char **argv) {
     Tela t;
@@ -111,8 +157,14 @@ int main(int argc, char **argv) {
     t.inicia(420, 380, "janela teste");
     Vertice * listaV = nullptr;
     preenche_matriz(jogo);
-    desenha_tela(jogo,t);
-    system("pause");
 
-  return 0;
+    while(1){ // Atualiza acontecimentos do jogo
+        desenha_tela(jogo, t);
+
+        movimenta_personagem(jogo, t);
+
+        t.espera(60);
+    }
+
+    return 0;
 }
