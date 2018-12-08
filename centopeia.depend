@@ -823,34 +823,3 @@
 	<fstream>
 	<cstdlib>
 
-1544239194 source:c:\users\user\documents\github\t7---pacman\principal.cpp
-	<chrono>
-	<list>
-	<random>
-	<vector>
-	<iostream>
-	<functional>
-	"Tela.hpp"
-	"geom.hpp"
-	<stdio.h>
-	<iostream>
-	<fstream>
-	<cstdlib>
-
-1544235974 c:\users\user\documents\github\t7---pacman\tela.hpp
-	<allegro5/allegro.h>
-	<allegro5/allegro_font.h>
-	<allegro5/allegro_image.h>
-	<allegro5/allegro_color.h>
-	<allegro5/allegro_primitives.h>
-	"geom.hpp"
-
-1544235980 c:\users\user\documents\github\t7---pacman\geom.hpp
-	<cmath>
-
-1544235974 source:c:\users\user\documents\github\t7---pacman\tela.cpp
-	<iostream>
-	<cstdlib>
-	"Tela.hpp"
-	"geom.hpp"
-
