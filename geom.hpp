@@ -33,8 +33,8 @@ namespace geom {
 
 // Um ponto, constituído por uma coordenada no eixo x e no eixo y
 struct Ponto {
-    float x;
-    float y;
+    int x;
+    int y;
 };
 
 // Tamanho, constituído por altura e largura, do tipo float

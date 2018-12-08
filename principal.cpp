@@ -125,26 +125,48 @@ void movimenta_personagem(Jogo * jogo, Tela t){
         case 4:
         case 83:
             jogo->Pacman->vH = VELOCIDADE_PACMAN;
-            jogo->Pacman->vV = 0;
             break;
         case 1:
         case 82:
             jogo->Pacman->vH = VELOCIDADE_PACMAN * -1;
-            jogo->Pacman->vV = 0;
             break;
         case 23:
         case 84:
-            jogo->Pacman->vH = 0;
             jogo->Pacman->vV = VELOCIDADE_PACMAN * -1;
             break;
         case 19:
         case 85:
-            jogo->Pacman->vH = 0;
             jogo->Pacman->vV = VELOCIDADE_PACMAN;
             break;
     }
 
-    printf("V H : %d  -- V V : %d\n", jogo->Pacman->vH, jogo->Pacman->vV);
+    int Cima;
+    int Baixo;
+    int Direita = (jogo->Pacman->pos.x+9)/20;;
+    int Esquerda = (jogo->Pacman->pos.x-9)/20;
+    if(jogo->Pacman->vV > 0){
+            Baixo = (jogo->Pacman->pos.y+VELOCIDADE_PACMAN+9)/20;
+            if(jogo->matriz[Baixo][Direita] == '0' && jogo->matriz[Baixo][Esquerda] == '0')
+                jogo->Pacman->pos.y += VELOCIDADE_PACMAN;
+
+    }else if(jogo->Pacman->vV < 0){
+            Cima = (int)(jogo->Pacman->pos.y-VELOCIDADE_PACMAN-10)/20;
+            if(jogo->matriz[Cima][Direita] == '0' && jogo->matriz[Cima][Esquerda] == '0')
+                jogo->Pacman->pos.y -= VELOCIDADE_PACMAN;
+
+    }
+    Cima = (jogo->Pacman->pos.y - 9)/20;
+    Baixo = (jogo->Pacman->pos.y + 9)/20;
+    if(jogo->Pacman->vH > 0){
+            Direita = (jogo->Pacman->pos.x+10)/20;
+            if(jogo->matriz[Cima][Direita] == '0' && jogo->matriz[Baixo][Direita] == '0')
+                jogo->Pacman->pos.x += VELOCIDADE_PACMAN;
+    }else if(jogo->Pacman->vH < 0){
+            Esquerda = (int)(jogo->Pacman->pos.x-11)/20;
+            if(jogo->matriz[Cima][Esquerda] == '0' && jogo->matriz[Baixo][Esquerda] == '0')
+                jogo->Pacman->pos.x -= VELOCIDADE_PACMAN;
+    }
+
 }
 
 
