@@ -16,71 +16,102 @@ using namespace tela;
 using namespace geom;
 using namespace std;
 
-void cria_vertice(char matriz[][21],int i, int j){
 
-    if(i != 0){
-        if(matriz[i-1][j] == '0'){
-            //aresta horizontal
-        }
-    }
-    if(j != 0){
-        if(matriz[i][j-1] == '0'){
-            //aresta vertical;
-        }
-    }
+struct Personagem{
+    Ponto pos;
+    int vV,vH;
+};
+
+
+struct Vertice{
+    Ponto pos;
+    Vertice *prox;
+};
+
+struct Jogo{
+    Personagem *Pacman;
+    Retangulo *listaR;
+    Vertice *listaV;
+    char matriz [19][21];
+};
+
+
+
+void adiciona_vertice(char matriz[][21],int i, int j){
+    Vertice *v = new Vertice;
+
 }
 
-void desenha_tela(Retangulo * r, Tela t){
+void desenha_tela(Jogo * jogo, Tela t){
+    Cor azul = {0.2, 0.3, 0.8};
+    Cor amarelo = {0.9, 0.9, 0.0};
+    t.cor(azul);
+
     t.limpa();
+    Retangulo * r = jogo->listaR;
     while(r != nullptr){
         t.retangulo(*r);
         r = r->prox;
-        cout << "\n\naaaaaa\n" << endl;
     }
+    Circulo *c = new Circulo;
+    c->centro.x = jogo->Pacman->pos.x;
+    c->centro.y = jogo->Pacman->pos.y;
+    c->raio = 10;
+    t.cor(amarelo);
+    t.circulo(*c);
     t.mostra();
     return;
 }
 
-void adiciona_retangulo(char matriz[][21], int i, int j,Retangulo ** lista){
+void adiciona_retangulo(Jogo * jogo, int i, int j){
     Retangulo *r = new Retangulo;
-    r->pos.x = i*20;
-    r->pos.y = j*20;
-    r->prox = *lista;
+    r->pos.x = j*20;
+    r->pos.y = i*20;
+    r->prox = jogo->listaR;
     r->tam.alt = 20;
     r->tam.larg = 20;
-    *lista = r;
-    cout << "\n" << j;
+    jogo->listaR = r;
+    return;
+}
+void inicia_personagem(Personagem *Pacman){
+    Pacman->pos.x = 10;
+    Pacman->pos.y = 10;
+    Pacman->vH = 0;
+    Pacman->vV = 0;
     return;
 }
 
-
-int main(int argc, char **argv) {
-    Tela t;
-    t.inicia(600, 400, "janela teste");
+void preenche_matriz(Jogo * jogo){
     ifstream arq;
     string mapa;
-    char matriz [19][21];
     arq.open("mapa.txt");
     if(!arq){
         cout << "não abriu o arquivo\n";
         exit(1);
     }
-    Retangulo * lista = nullptr;
-
     for(int i = 0; i < 19; i++){
         getline(arq, mapa);
         for(int j = 0; j < 21; j++){
-            matriz[i][j] = mapa[j];
+            jogo->matriz[i][j] = mapa[j];
             if(mapa[j] == 0)
-                cria_vertice(matriz,i,j);
+                adiciona_vertice(jogo->matriz,i,j);
             if(mapa[j] == '1'){
-                adiciona_retangulo(matriz,i,j,&lista);
+                adiciona_retangulo(jogo,i,j);
             }
         }
     }
-    Cor azul = {0.2, 0.3, 0.8};
-    t.cor(azul);
-    desenha_tela(lista,t);
+}
+
+int main(int argc, char **argv) {
+    Tela t;
+    Jogo *jogo = new Jogo;
+    jogo->listaR = nullptr;
+    jogo->Pacman = new Personagem;
+    inicia_personagem(jogo->Pacman);
+    t.inicia(420, 380, "janela teste");
+    Vertice * listaV = nullptr;
+    preenche_matriz(jogo);
+    desenha_tela(jogo,t);
     system("pause");
 
   return 0;
