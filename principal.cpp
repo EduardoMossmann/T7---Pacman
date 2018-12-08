@@ -30,11 +30,14 @@ void cria_vertice(char matriz[][21],int i, int j){
     }
 }
 
-void desenha_tela(Retangulo *r, Tela *t){
+void desenha_tela(Retangulo * r, Tela t){
+    t.limpa();
     while(r != nullptr){
-        t->retangulo(*r);
+        t.retangulo(*r);
         r = r->prox;
+        cout << "\n\naaaaaa\n" << endl;
     }
+    t.mostra();
     return;
 }
 
@@ -77,7 +80,7 @@ int main(int argc, char **argv) {
     }
     Cor azul = {0.2, 0.3, 0.8};
     t.cor(azul);
-    desenha_tela(lista,&t);
+    desenha_tela(lista,t);
     system("pause");
 
   return 0;
