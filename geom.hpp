@@ -55,6 +55,7 @@ struct Retangulo {
 struct Circulo {
     Ponto centro;
     float raio;
+    Circulo *prox;
 };
 
 // Funções
