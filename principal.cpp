@@ -10,9 +10,11 @@
 #include <iostream>
 #include <fstream> //para acesso a  arquivos
 #include <cstdlib> //para usar o exit
+#include <map>
 
 #define VELOCIDADE_PACMAN 1
 #define RAIO_PACMAN 10
+
 
 using namespace tela;
 using namespace geom;
@@ -26,31 +28,36 @@ struct Personagem{
 
 
 struct Vertice{
+    int cor;
     Ponto pos;
-    Vertice *prox;
+    list<int> adj;
 };
 
 struct Jogo{
     Personagem *Pacman;
     Retangulo *listaR;
-    Vertice *listaV;
+    map<int, Vertice> grafo;
     int ultima_tecla;
     char matriz [19][21];
 };
 
 
-void adiciona_vertice(char matriz[][21],int i, int j){
-    Vertice *v = new Vertice;
-
+void adiciona_vertice(Jogo * jogo, int i, int j, int nCol){
+    Vertice v;
+    v.cor = 0;
+    v.pos.x = j * 20;
+    v.pos.y = i * 20;
+    jogo->grafo.insert ( pair<int,Vertice>( i*nCol + j, v) );
 }
 
 void desenha_tela(Jogo * jogo, Tela t){
-    Cor preto = {1, 1, 1};
+    Cor preto = {0, 0, 0};
     Cor azul = {0.2, 0.3, 0.8};
     Cor amarelo = {0.9, 0.9, 0.0};
 
     t.limpa();
 
+    t.cor(preto);
     Retangulo fundo_preto;
     fundo_preto.pos = {0, 0};
     fundo_preto.tam = {420, 380};
@@ -109,9 +116,9 @@ void preenche_matriz(Jogo * jogo){
         getline(arq, mapa);
         for(int j = 0; j < 21; j++){
             jogo->matriz[i][j] = mapa[j];
-            if(mapa[j] == 0)
-                adiciona_vertice(jogo->matriz,i,j);
-            if(mapa[j] == '1'){
+            if(mapa[j] == '0'){
+                adiciona_vertice(jogo, i, j, 21);
+            }if(mapa[j] == '1'){
                 adiciona_retangulo(jogo,i,j);
             }
         }
@@ -174,6 +181,20 @@ void movimenta_personagem(Jogo * jogo, Tela t){
 
 }
 
+void cria_adjacencia(Jogo * jogo){
+    for(auto i = jogo->grafo.begin(); i != jogo->grafo.end(); i++){
+        for(auto j = jogo->grafo.begin(); j != jogo->grafo.end(); j++){
+            if(( (i->second.pos.x == j->second.pos.x + 20 || i->second.pos.x == j->second.pos.x - 20)
+                && i->second.pos.y == j->second.pos.y )
+               ||
+               ( (i->second.pos.y == j->second.pos.y + 20 || i->second.pos.y == j->second.pos.y - 20)
+                && i->second.pos.x == j->second.pos.x )
+            ){
+                i->second.adj.push_back(j->first);
+            }
+        }
+    }
+}
 
 int main(int argc, char **argv) {
     Tela t;
@@ -183,7 +204,9 @@ int main(int argc, char **argv) {
     inicia_personagem(jogo->Pacman);
     t.inicia(420, 380, "janela teste");
     Vertice * listaV = nullptr;
+
     preenche_matriz(jogo);
+    cria_adjacencia(jogo);
 
     while(1){ // Atualiza acontecimentos do jogo
         desenha_tela(jogo, t);
@@ -191,6 +214,16 @@ int main(int argc, char **argv) {
         movimenta_personagem(jogo, t);
 
         t.espera(12);
+        break;
+    }
+
+    for(auto i = jogo->grafo.begin(); i != jogo->grafo.end(); i++){
+        cout << i->first << " -> ";
+        for(auto j = i->second.adj.begin(); j != i->second.adj.end(); j++){
+            cout << " " << *j << " ";
+        }
+        cout << "Oi\n";
+        system("pause");
     }
 
     return 0;
