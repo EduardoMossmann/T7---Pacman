@@ -21,7 +21,7 @@ using namespace std;
 
 struct Personagem{
     Ponto pos;
-    int vV,vH;
+    int vV,vH,f;
 };
 
 
@@ -36,6 +36,8 @@ struct Jogo{
     Vertice *listaV;
     int ultima_tecla;
     char matriz [19][21];
+    Circulo *listaP;
+    int pontos;
 };
 
 
@@ -45,12 +47,13 @@ void adiciona_vertice(char matriz[][21],int i, int j){
 }
 
 void desenha_tela(Jogo * jogo, Tela t){
-    Cor preto = {1, 1, 1};
+    Cor branco = {1, 1, 1};
     Cor azul = {0.2, 0.3, 0.8};
     Cor amarelo = {0.9, 0.9, 0.0};
+    Cor preto = {0,0,0};
 
     t.limpa();
-
+    t.cor(preto);
     Retangulo fundo_preto;
     fundo_preto.pos = {0, 0};
     fundo_preto.tam = {420, 380};
@@ -64,13 +67,20 @@ void desenha_tela(Jogo * jogo, Tela t){
         r = r->prox;
     }
 
+    t.cor(branco);
+    Circulo *c = jogo->listaP;
+    while(c != nullptr){
+        t.circulo(*c);
+        c = c->prox;
+    }
 
-    Circulo *c = new Circulo;
-    c->centro.x = jogo->Pacman->pos.x;
-    c->centro.y = jogo->Pacman->pos.y;
-    c->raio = RAIO_PACMAN;
+
+    Circulo *c2 = new Circulo;
+    c2->centro.x = jogo->Pacman->pos.x;
+    c2->centro.y = jogo->Pacman->pos.y;
+    c2->raio = RAIO_PACMAN;
     t.cor(amarelo);
-    t.circulo(*c);
+    t.circulo(*c2);
 
 
 
@@ -88,11 +98,22 @@ void adiciona_retangulo(Jogo * jogo, int i, int j){
     jogo->listaR = r;
     return;
 }
+void adiciona_circulo(Jogo * jogo, int i, int j){
+    Circulo *c = new Circulo;
+    c->centro.x = (j*20)+RAIO_PACMAN;
+    c->centro.y = (i*20)+RAIO_PACMAN;
+    c->raio = 2;
+    c->prox = jogo->listaP;
+    jogo->listaP = c;
+    return;
+}
+
 void inicia_personagem(Personagem *Pacman){
     Pacman->pos.x = 10;
     Pacman->pos.y = 10;
     Pacman->vH = 0;
     Pacman->vV = 0;
+    Pacman->f = 0;
     return;
 }
 
@@ -109,8 +130,8 @@ void preenche_matriz(Jogo * jogo){
         getline(arq, mapa);
         for(int j = 0; j < 21; j++){
             jogo->matriz[i][j] = mapa[j];
-            if(mapa[j] == 0)
-                adiciona_vertice(jogo->matriz,i,j);
+            if(mapa[j] == '0')
+                adiciona_circulo(jogo,i,j);
             if(mapa[j] == '1'){
                 adiciona_retangulo(jogo,i,j);
             }
@@ -165,11 +186,26 @@ void movimenta_personagem(Jogo * jogo, Tela t){
             if(jogo->matriz[Cima][Direita] == '0' && jogo->matriz[Baixo][Direita] == '0'
                && jogo->Pacman->pos.x < 420 - RAIO_PACMAN)
                 jogo->Pacman->pos.x += VELOCIDADE_PACMAN;
+
     }else if(jogo->Pacman->vH < 0){
             Esquerda = (int)(jogo->Pacman->pos.x-11)/20;
             if(jogo->matriz[Cima][Esquerda] == '0' && jogo->matriz[Baixo][Esquerda] == '0'
                && jogo->Pacman->pos.x > 0 + RAIO_PACMAN)
                 jogo->Pacman->pos.x -= VELOCIDADE_PACMAN;
+    }
+    Direita = (jogo->Pacman->pos.x+9);
+    Esquerda = (jogo->Pacman->pos.x-9);
+    Cima = (jogo->Pacman->pos.y-9);
+    Baixo = (jogo->Pacman->pos.y+9);
+    Circulo *c = jogo->listaP;
+    Circulo *prox = jogo->listaP->prox;
+    while(c != nullptr){
+        if(c->centro.x < Direita && c->centro.x > Esquerda && c->centro.y < Baixo && c->centro.y > Cima){
+
+            delete[] c;
+            jogo->pontos++;
+        }
+        c = c->prox;
     }
 
 }
@@ -178,7 +214,9 @@ void movimenta_personagem(Jogo * jogo, Tela t){
 int main(int argc, char **argv) {
     Tela t;
     Jogo *jogo = new Jogo;
+    jogo->pontos = 0;
     jogo->listaR = nullptr;
+    jogo->listaP = nullptr;
     jogo->Pacman = new Personagem;
     inicia_personagem(jogo->Pacman);
     t.inicia(420, 380, "janela teste");
