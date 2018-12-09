@@ -11,7 +11,8 @@
 #include <fstream> //para acesso a  arquivos
 #include <cstdlib> //para usar o exit
 
-#define VELOCIDADE_PACMAN 2
+#define VELOCIDADE_PACMAN 1
+#define RAIO_PACMAN 10
 
 using namespace tela;
 using namespace geom;
@@ -67,7 +68,7 @@ void desenha_tela(Jogo * jogo, Tela t){
     Circulo *c = new Circulo;
     c->centro.x = jogo->Pacman->pos.x;
     c->centro.y = jogo->Pacman->pos.y;
-    c->raio = 10;
+    c->raio = RAIO_PACMAN;
     t.cor(amarelo);
     t.circulo(*c);
 
@@ -146,12 +147,14 @@ void movimenta_personagem(Jogo * jogo, Tela t){
     int Esquerda = (jogo->Pacman->pos.x-9)/20;
     if(jogo->Pacman->vV > 0){
             Baixo = (jogo->Pacman->pos.y+VELOCIDADE_PACMAN+9)/20;
-            if(jogo->matriz[Baixo][Direita] == '0' && jogo->matriz[Baixo][Esquerda] == '0')
+            if(jogo->matriz[Baixo][Direita] == '0' && jogo->matriz[Baixo][Esquerda] == '0'
+               && jogo->Pacman->pos.y < 380 - RAIO_PACMAN)
                 jogo->Pacman->pos.y += VELOCIDADE_PACMAN;
 
     }else if(jogo->Pacman->vV < 0){
             Cima = (int)(jogo->Pacman->pos.y-VELOCIDADE_PACMAN-10)/20;
-            if(jogo->matriz[Cima][Direita] == '0' && jogo->matriz[Cima][Esquerda] == '0')
+            if(jogo->matriz[Cima][Direita] == '0' && jogo->matriz[Cima][Esquerda] == '0'
+               && jogo->Pacman->pos.y > 0 + RAIO_PACMAN)
                 jogo->Pacman->pos.y -= VELOCIDADE_PACMAN;
 
     }
@@ -159,11 +162,13 @@ void movimenta_personagem(Jogo * jogo, Tela t){
     Baixo = (jogo->Pacman->pos.y + 9)/20;
     if(jogo->Pacman->vH > 0){
             Direita = (jogo->Pacman->pos.x+10)/20;
-            if(jogo->matriz[Cima][Direita] == '0' && jogo->matriz[Baixo][Direita] == '0')
+            if(jogo->matriz[Cima][Direita] == '0' && jogo->matriz[Baixo][Direita] == '0'
+               && jogo->Pacman->pos.x < 420 - RAIO_PACMAN)
                 jogo->Pacman->pos.x += VELOCIDADE_PACMAN;
     }else if(jogo->Pacman->vH < 0){
             Esquerda = (int)(jogo->Pacman->pos.x-11)/20;
-            if(jogo->matriz[Cima][Esquerda] == '0' && jogo->matriz[Baixo][Esquerda] == '0')
+            if(jogo->matriz[Cima][Esquerda] == '0' && jogo->matriz[Baixo][Esquerda] == '0'
+               && jogo->Pacman->pos.x > 0 + RAIO_PACMAN)
                 jogo->Pacman->pos.x -= VELOCIDADE_PACMAN;
     }
 
@@ -185,7 +190,7 @@ int main(int argc, char **argv) {
 
         movimenta_personagem(jogo, t);
 
-        t.espera(60);
+        t.espera(12);
     }
 
     return 0;
