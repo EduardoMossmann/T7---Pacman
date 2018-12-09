@@ -147,18 +147,26 @@ void movimenta_personagem(Jogo * jogo, Tela t){
         case 4:
         case 83:
             jogo->Pacman->vH = VELOCIDADE_PACMAN;
+            if(jogo->Pacman->f == 2)
+                jogo->Pacman->vV = 0;
             break;
         case 1:
         case 82:
             jogo->Pacman->vH = VELOCIDADE_PACMAN * -1;
+            if(jogo->Pacman->f == 2)
+                jogo->Pacman->vV = 0;
             break;
         case 23:
         case 84:
             jogo->Pacman->vV = VELOCIDADE_PACMAN * -1;
+            if(jogo->Pacman->f == 1)
+                jogo->Pacman->vH = 0;
             break;
         case 19:
         case 85:
             jogo->Pacman->vV = VELOCIDADE_PACMAN;
+            if(jogo->Pacman->f == 1)
+                jogo->Pacman->vH = 0;
             break;
     }
 
@@ -169,14 +177,17 @@ void movimenta_personagem(Jogo * jogo, Tela t){
     if(jogo->Pacman->vV > 0){
             Baixo = (jogo->Pacman->pos.y+VELOCIDADE_PACMAN+9)/20;
             if(jogo->matriz[Baixo][Direita] == '0' && jogo->matriz[Baixo][Esquerda] == '0'
-               && jogo->Pacman->pos.y < 380 - RAIO_PACMAN)
+               && jogo->Pacman->pos.y < 380 - RAIO_PACMAN){
                 jogo->Pacman->pos.y += VELOCIDADE_PACMAN;
-
+                jogo->Pacman->f=1;
+               }
     }else if(jogo->Pacman->vV < 0){
             Cima = (int)(jogo->Pacman->pos.y-VELOCIDADE_PACMAN-10)/20;
             if(jogo->matriz[Cima][Direita] == '0' && jogo->matriz[Cima][Esquerda] == '0'
-               && jogo->Pacman->pos.y > 0 + RAIO_PACMAN)
+               && jogo->Pacman->pos.y > 0 + RAIO_PACMAN){
                 jogo->Pacman->pos.y -= VELOCIDADE_PACMAN;
+               jogo->Pacman->f=1;
+               }
 
     }
     Cima = (jogo->Pacman->pos.y - 9)/20;
@@ -184,29 +195,45 @@ void movimenta_personagem(Jogo * jogo, Tela t){
     if(jogo->Pacman->vH > 0){
             Direita = (jogo->Pacman->pos.x+10)/20;
             if(jogo->matriz[Cima][Direita] == '0' && jogo->matriz[Baixo][Direita] == '0'
-               && jogo->Pacman->pos.x < 420 - RAIO_PACMAN)
+               && jogo->Pacman->pos.x < 420 - RAIO_PACMAN){
                 jogo->Pacman->pos.x += VELOCIDADE_PACMAN;
+                jogo->Pacman->f=2;
+               }
 
     }else if(jogo->Pacman->vH < 0){
             Esquerda = (int)(jogo->Pacman->pos.x-11)/20;
             if(jogo->matriz[Cima][Esquerda] == '0' && jogo->matriz[Baixo][Esquerda] == '0'
-               && jogo->Pacman->pos.x > 0 + RAIO_PACMAN)
+               && jogo->Pacman->pos.x > 0 + RAIO_PACMAN){
                 jogo->Pacman->pos.x -= VELOCIDADE_PACMAN;
+                jogo->Pacman->f=2;
+               }
     }
-    Direita = (jogo->Pacman->pos.x+9);
-    Esquerda = (jogo->Pacman->pos.x-9);
-    Cima = (jogo->Pacman->pos.y-9);
-    Baixo = (jogo->Pacman->pos.y+9);
-    Circulo *c = jogo->listaP;
-    Circulo *prox = jogo->listaP->prox;
-    while(c != nullptr){
-        if(c->centro.x < Direita && c->centro.x > Esquerda && c->centro.y < Baixo && c->centro.y > Cima){
+    if(jogo->listaP != nullptr){
+            Direita = (jogo->Pacman->pos.x+9);
+            Esquerda = (jogo->Pacman->pos.x-9);
+            Cima = (jogo->Pacman->pos.y-9);
+            Baixo = (jogo->Pacman->pos.y+9);
+            Circulo *c = jogo->listaP;
+            Circulo *prox = jogo->listaP->prox;
+            Circulo *aux;
+            if(c->centro.x < Direita && c->centro.x > Esquerda && c->centro.y < Baixo && c->centro.y > Cima){
+                jogo->listaP = prox;
+                delete[] c;
 
-            delete[] c;
-            jogo->pontos++;
-        }
-        c = c->prox;
+            }
+            while(prox != nullptr){
+                if(prox->centro.x < Direita && prox->centro.x > Esquerda && prox->centro.y < Baixo && prox->centro.y > Cima){
+                    aux = prox->prox;
+                    delete[] prox;
+                    c->prox = aux;
+                    jogo->pontos++;
+                    break;
+                }
+                prox = prox->prox;
+                c = c->prox;
+            }
     }
+
 
 }
 
