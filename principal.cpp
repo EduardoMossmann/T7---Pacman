@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream> //para acesso a  arquivos
 #include <cstdlib> //para usar o exit
+#include <map>
 
 #define VELOCIDADE_PACMAN 1
 #define RAIO_PACMAN 10
@@ -26,25 +27,20 @@ struct Personagem{
 
 
 struct Vertice{
+    int cor;
     Ponto pos;
-    Vertice *prox;
+    list<int> adj;
 };
 
 struct Jogo{
     Personagem *Pacman;
     Retangulo *listaR;
-    Vertice *listaV;
+    map<int, Vertice> grafo;
     int ultima_tecla;
     char matriz [19][21];
     Circulo *listaP;
     int pontos;
 };
-
-
-void adiciona_vertice(char matriz[][21],int i, int j){
-    Vertice *v = new Vertice;
-
-}
 
 void desenha_tela(Jogo * jogo, Tela t){
     Cor branco = {1, 1, 1};
@@ -88,6 +84,27 @@ void desenha_tela(Jogo * jogo, Tela t){
     return;
 }
 
+void adiciona_vertice(Jogo * jogo, int i, int j, int nCol){
+    Vertice v;
+    v.cor = 0;
+    v.pos.x = j * 20;
+    v.pos.y = i * 20;
+    jogo->grafo.insert ( pair<int,Vertice>( i*nCol + j, v) );
+}
+void cria_adjacencia(Jogo * jogo){
+    for(auto i = jogo->grafo.begin(); i != jogo->grafo.end(); i++){
+        for(auto j = jogo->grafo.begin(); j != jogo->grafo.end(); j++){
+            if(( (i->second.pos.x == j->second.pos.x + 20 || i->second.pos.x == j->second.pos.x - 20)
+                && i->second.pos.y == j->second.pos.y )
+               ||
+               ( (i->second.pos.y == j->second.pos.y + 20 || i->second.pos.y == j->second.pos.y - 20)
+                && i->second.pos.x == j->second.pos.x )
+            ){
+                i->second.adj.push_back(j->first);
+            }
+        }
+    }
+}
 void adiciona_retangulo(Jogo * jogo, int i, int j){
     Retangulo *r = new Retangulo;
     r->pos.x = j*20;
@@ -130,9 +147,10 @@ void preenche_matriz(Jogo * jogo){
         getline(arq, mapa);
         for(int j = 0; j < 21; j++){
             jogo->matriz[i][j] = mapa[j];
-            if(mapa[j] == '0')
+            if(mapa[j] == '0'){
+                adiciona_vertice(jogo, i, j, 21);
                 adiciona_circulo(jogo,i,j);
-            if(mapa[j] == '1'){
+            }if(mapa[j] == '1'){
                 adiciona_retangulo(jogo,i,j);
             }
         }
@@ -208,11 +226,13 @@ void movimenta_personagem(Jogo * jogo, Tela t){
                 jogo->Pacman->f=2;
                }
     }
-    if(jogo->listaP != nullptr){
-            Direita = (jogo->Pacman->pos.x+9);
-            Esquerda = (jogo->Pacman->pos.x-9);
-            Cima = (jogo->Pacman->pos.y-9);
-            Baixo = (jogo->Pacman->pos.y+9);
+}
+void conta_pontos(Jogo * jogo, Tela t){
+     if(jogo->listaP != nullptr){
+            int Direita = (jogo->Pacman->pos.x+9);
+            int Esquerda = (jogo->Pacman->pos.x-9);
+            int Cima = (jogo->Pacman->pos.y-9);
+            int Baixo = (jogo->Pacman->pos.y+9);
             Circulo *c = jogo->listaP;
             Circulo *prox = jogo->listaP->prox;
             Circulo *aux;
@@ -233,11 +253,35 @@ void movimenta_personagem(Jogo * jogo, Tela t){
                 c = c->prox;
             }
     }
+}
+/*void menor_caminho (Jogo * Jogo, Vertice * origem, Vertice * destino){
+    Lista * lista = cria_lista();
+    adiciona_item(lista, origem);
 
+    Item * item = lista->primeiro_item;
+    while (item!=NULL){
+
+        int cont = 0;
+        Vertice ** vertices_destino = grafo_busca_vertices_saida(grafo, item->vertice, &cont);
+        int i = 0;
+        for (i=0;i<cont;i++){
+            Item * item_ = busca_item(lista,  vertices_destino[i]);
+            if (item_==NULL){
+               item_ = adiciona_item(lista, vertices_destino[i]);
+               item_->precedente = item;
+            }
+            if (vertices_destino[i] == destino){
+                printf("Menor Caminho: ");
+                exibe_menor_caminho(item_);
+                return;
+            }
+        }
+    item = item->prox_item;
+    }
+    printf("Nao existe caminho entre %s e %s", grafo_retorna_nome(origem), grafo_retorna_nome(destino));
 
 }
-
-
+*/
 int main(int argc, char **argv) {
     Tela t;
     Jogo *jogo = new Jogo;
@@ -247,13 +291,15 @@ int main(int argc, char **argv) {
     jogo->Pacman = new Personagem;
     inicia_personagem(jogo->Pacman);
     t.inicia(420, 380, "janela teste");
-    Vertice * listaV = nullptr;
     preenche_matriz(jogo);
+    cria_adjacencia(jogo);
 
     while(1){ // Atualiza acontecimentos do jogo
         desenha_tela(jogo, t);
 
         movimenta_personagem(jogo, t);
+
+        conta_pontos(jogo, t);
 
         t.espera(12);
     }
