@@ -54,7 +54,6 @@ void adiciona_vertice(Jogo * jogo, int i, int j, int nCol){
 
 void desenha_tela(Jogo * jogo, Tela t){
 
-    Cor preto = {0, 0, 0};
     Cor branco = {1, 1, 1};
     Cor azul = {0.2, 0.3, 0.8};
     Cor amarelo = {0.9, 0.9, 0.0};
@@ -90,6 +89,7 @@ void desenha_tela(Jogo * jogo, Tela t){
     c2->raio = RAIO_PACMAN;
     t.cor(amarelo);
     t.circulo(*c2);
+
 
 
 
@@ -209,12 +209,21 @@ void movimenta_personagem(Jogo * jogo, Tela t){
     Baixo = (jogo->Pacman->pos.y+9);
     Circulo *c = jogo->listaP;
     Circulo *prox = jogo->listaP->prox;
-    while(c != nullptr){
-        if(c->centro.x < Direita && c->centro.x > Esquerda && c->centro.y < Baixo && c->centro.y > Cima){
-
-            delete[] c;
+    Circulo *aux;
+    if(c->centro.x < Direita && c->centro.x > Esquerda && c->centro.y < Baixo && c->centro.y > Cima){
+        jogo->listaP = prox;
+        printf("\nAa");
+        delete[] c;
+    }
+    while(prox != nullptr){
+        if(prox->centro.x < Direita && prox->centro.x > Esquerda && prox->centro.y < Baixo && prox->centro.y > Cima){
+            aux = prox->prox;
+            delete[] prox;
+            c->prox = aux;
             jogo->pontos++;
         }
+        printf("\nAa");
+        prox = prox->prox;
         c = c->prox;
     }
 
@@ -255,7 +264,6 @@ int main(int argc, char **argv) {
         movimenta_personagem(jogo, t);
 
         t.espera(12);
-        break;
     }
 
     for(auto i = jogo->grafo.begin(); i != jogo->grafo.end(); i++){
