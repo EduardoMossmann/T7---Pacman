@@ -1081,7 +1081,7 @@
 1372642732 c:\users\user\documents\github\allegro-5.0.10-mingw-4.7.0\include\allegro5\allegro_primitives.h
 	<allegro5/allegro.h>
 
-1544404159 source:c:\users\user\documents\github\t7---pacman\principal.cpp
+1544334673 source:c:\users\user\documents\github\t7---pacman\principal.cpp
 	<chrono>
 	<list>
 	<random>
@@ -1094,7 +1094,6 @@
 	<iostream>
 	<fstream>
 	<cstdlib>
-	<map>
 
 1544326341 source:c:\users\usuário\desktop\t7-pacman\t7---pacman\principal.cpp
 	<chrono>
