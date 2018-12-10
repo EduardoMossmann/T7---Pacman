@@ -47,6 +47,7 @@ void desenha_tela(Jogo * jogo, Tela t){
     Cor azul = {0.2, 0.3, 0.8};
     Cor amarelo = {0.9, 0.9, 0.0};
     Cor preto = {0,0,0};
+    Cor cinza = {0.2,0.2,0.2};
 
     t.limpa();
     t.cor(preto);
@@ -70,6 +71,14 @@ void desenha_tela(Jogo * jogo, Tela t){
         c = c->prox;
     }
 
+    t.cor(cinza);
+    Retangulo *r2 = new Retangulo;
+    r2->pos.x = 0;
+    r2->pos.y = 380;
+    r2->tam.alt = 60;
+    r2->tam.larg = 420;
+    t.retangulo(*r2);
+
 
     Circulo *c2 = new Circulo;
     c2->centro.x = jogo->Pacman->pos.x;
@@ -77,6 +86,13 @@ void desenha_tela(Jogo * jogo, Tela t){
     c2->raio = RAIO_PACMAN;
     t.cor(amarelo);
     t.circulo(*c2);
+
+    Ponto *p = new Ponto;
+    p->x = 150;
+    p->y = 410;
+    string pont = "Pontos: ";
+    pont +=  to_string(jogo->pontos);
+    t.texto(*p,pont.c_str());
 
 
 
@@ -115,11 +131,11 @@ void adiciona_retangulo(Jogo * jogo, int i, int j){
     jogo->listaR = r;
     return;
 }
-void adiciona_circulo(Jogo * jogo, int i, int j){
+void adiciona_circulo(Jogo * jogo, int i, int j, int raio){
     Circulo *c = new Circulo;
     c->centro.x = (j*20)+RAIO_PACMAN;
     c->centro.y = (i*20)+RAIO_PACMAN;
-    c->raio = 2;
+    c->raio = raio;
     c->prox = jogo->listaP;
     jogo->listaP = c;
     return;
@@ -149,7 +165,12 @@ void preenche_matriz(Jogo * jogo){
             jogo->matriz[i][j] = mapa[j];
             if(mapa[j] == '0'){
                 adiciona_vertice(jogo, i, j, 21);
-                adiciona_circulo(jogo,i,j);
+                if(j == 20 && i == 18){
+                    adiciona_circulo(jogo,i,j,8);
+                }else{
+                    adiciona_circulo(jogo,i,j,2);
+                }
+
             }if(mapa[j] == '1'){
                 adiciona_retangulo(jogo,i,j);
             }
@@ -239,19 +260,23 @@ void conta_pontos(Jogo * jogo, Tela t){
             if(c->centro.x < Direita && c->centro.x > Esquerda && c->centro.y < Baixo && c->centro.y > Cima){
                 jogo->listaP = prox;
                 delete[] c;
-
+                jogo->pontos++;
             }
             while(prox != nullptr){
                 if(prox->centro.x < Direita && prox->centro.x > Esquerda && prox->centro.y < Baixo && prox->centro.y > Cima){
+                    jogo->pontos++;
                     aux = prox->prox;
                     delete[] prox;
                     c->prox = aux;
-                    jogo->pontos++;
                     break;
                 }
                 prox = prox->prox;
                 c = c->prox;
             }
+    }else{
+        t.finaliza();
+        cout << "Parabens, voce ganhou \nPontuacao: " << jogo->pontos;
+        exit(1);
     }
 }
 /*void menor_caminho (Jogo * Jogo, Vertice * origem, Vertice * destino){
@@ -290,7 +315,7 @@ int main(int argc, char **argv) {
     jogo->listaP = nullptr;
     jogo->Pacman = new Personagem;
     inicia_personagem(jogo->Pacman);
-    t.inicia(420, 380, "janela teste");
+    t.inicia(420, 440, "janela teste");
     preenche_matriz(jogo);
     cria_adjacencia(jogo);
 
